@@ -6,11 +6,11 @@ import { GetSeatsDto } from './dtos/get-seats.dto';
 export class SeatsController {
   constructor(private readonly seatsService: SeatsService) {}
 
-  @Get('/')
-  getSeats(@Query() query: GetSeatsDto) {
+  @Get('/available')
+  getAvailableSeats(@Query() query: GetSeatsDto) {
     try {
-      const { status, showtimeId } = query;
-      return this.seatsService.getSeatsByStatusAndShowtime(status, showtimeId);
+      const { showtimeId } = query;
+      return this.seatsService.getAvailableSeats(showtimeId);
     } catch (error) {
       throw new HttpException(error.message, error.status);
     }

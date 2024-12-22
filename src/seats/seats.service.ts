@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Seats } from './entities/seats.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,29 +9,24 @@ export class SeatsService {
     @InjectRepository(Seats) private seatsRepository: Repository<Seats>,
   ) {}
 
-  async getSeatsByStatusAndShowtime(
-    status: 'AVAILABLE' | 'RESERVED' | 'SOLD' | null,
-    showtimeId: number,
-  ) {
-    try {
-      const result = await this.seatsRepository
-        .query(`SELECT s.\`row_number\`, s.number AS seat_number, h.name AS hall_name, s.status
-        FROM seats s
-        JOIN hall h ON s.hall_id = h.id
-        JOIN showtime st ON st.hall_id = h.id
-        LEFT JOIN ticket t ON t.seat_id = s.id AND t.showtime_id = st.id
-        WHERE st.id = ${showtimeId} ${status ? `AND s.status = '${status}'` : ''};`);
+  async getAvailableSeats(showtimeId: number) {
+    const result = await this.seatsRepository.query(`SELECT *
+      FROM seats s
+      WHERE NOT EXISTS (
+          SELECT 1
+          FROM ticket t
+          WHERE t.seat_id = s.id
+            AND t.showtime_id = ${showtimeId}
+            AND (t.status = 'SOLD' OR t.status = 'RESERVED')
+      );`);
 
-      return {
-        status: 'success',
-        message: 'Seats retrieved successfully',
-        data: {
-          length: result.length,
-          seats: result,
-        },
-      };
-    } catch (error) {
-      throw new HttpException(error.message, error.status);
-    }
+    return {
+      status: 'success',
+      message: 'Seats fetched successfully',
+      data: {
+        length: result.length,
+        seats: result,
+      },
+    };
   }
 }

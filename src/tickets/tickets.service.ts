@@ -9,8 +9,8 @@ export class TicketsService {
     @InjectRepository(Tickets) private ticketRepository: Repository<Tickets>,
   ) {}
 
-  async findOneByShowtime(userId: string, showtimeId: number) {
-    const result = await this.ticketRepository.findOne({
+  async findAllByShowtime(userId: string, showtimeId: number) {
+    const result = await this.ticketRepository.find({
       where: { user_id: userId, showtime_id: showtimeId },
     });
 

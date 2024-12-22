@@ -48,7 +48,6 @@ CREATE TABLE IF NOT EXISTS `seats` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `row_number` int(11) NOT NULL,
   `number` int(11) NOT NULL,
-  `status` enum('AVAILABLE', 'RESERVED', 'SOLD') NOT NULL DEFAULT 'AVAILABLE',
   `hall_id` int(11) NOT NULL,
    PRIMARY KEY (`id`),
    FOREIGN KEY (`hall_id`) REFERENCES `hall`(`id`)

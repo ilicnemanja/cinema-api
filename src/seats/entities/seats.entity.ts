@@ -12,13 +12,6 @@ export class Seats {
   @Column()
   number: number;
 
-  @Column({
-    type: 'enum',
-    enum: ['AVAILABLE', 'RESERVED', 'SOLD'],
-    default: 'AVAILABLE',
-  })
-  status: string;
-
   @ManyToOne(() => Hall, (hall) => hall.seats, { onDelete: 'CASCADE' })
   hall: Hall;
 }

@@ -10,9 +10,9 @@ export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.Admin)
-  @Get('find-one')
-  findOneByShowtime(@Request() req, @Query('showtimeId') showtimeId: number) {
-    return this.ticketsService.findOneByShowtime(req.user.sub, showtimeId);
+  @Roles(Role.Customer, Role.Admin)
+  @Get('/')
+  findAllByShowtime(@Request() req, @Query('showtimeId') showtimeId: number) {
+    return this.ticketsService.findAllByShowtime(req.user.sub, showtimeId);
   }
 }
