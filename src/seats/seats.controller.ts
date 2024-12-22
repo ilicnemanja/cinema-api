@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { SeatsService } from './seats.service';
 import { GetSeatsDto } from './dtos/get-seats.dto';
 
@@ -12,7 +12,7 @@ export class SeatsController {
       const { showtimeId } = query;
       return this.seatsService.getAvailableSeats(showtimeId);
     } catch (error) {
-      throw new HttpException(error.message, error.status);
+      throw error;
     }
   }
 }

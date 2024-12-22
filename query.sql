@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `movie` (
   `image` varchar(255),
   `rating` varchar(255),
   `release_date` date NOT NULL,
-  `duration` int(11) NOT NULL,
+  `duration` DECIMAL(4,2) NOT NULL,
   `description` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `movie_genre` (
   `genre_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`movie_id`) REFERENCES `movie`(`id`),
-  FOREIGN KEY (`genre_id`) REFERENCES `genre`(`id`)
+  FOREIGN KEY (`genre_id`) REFERENCES `genre`(`id`),
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `hall` (
