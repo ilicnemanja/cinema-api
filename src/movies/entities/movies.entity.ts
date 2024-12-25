@@ -1,5 +1,13 @@
 import { Genres } from 'src/genres/entities/genres.entity';
-import { Entity, Column, ManyToMany, JoinTable, PrimaryColumn } from 'typeorm';
+import { Showtimes } from 'src/showtimes/entities/showtimes.entity';
+import {
+  Entity,
+  Column,
+  ManyToMany,
+  JoinTable,
+  PrimaryColumn,
+  OneToMany,
+} from 'typeorm';
 
 @Entity('movie')
 export class Movies {
@@ -35,4 +43,7 @@ export class Movies {
     inverseJoinColumn: { name: 'genre_id', referencedColumnName: 'id' },
   })
   genres: Genres[];
+
+  @OneToMany(() => Showtimes, (showtime) => showtime.movie)
+  showtimes: Showtimes[];
 }

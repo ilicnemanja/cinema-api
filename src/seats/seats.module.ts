@@ -8,5 +8,6 @@ import { SeatsController } from './seats.controller';
   imports: [TypeOrmModule.forFeature([Seats])],
   providers: [SeatsService],
   controllers: [SeatsController],
+  exports: [SeatsService],
 })
 export class SeatsModule {}

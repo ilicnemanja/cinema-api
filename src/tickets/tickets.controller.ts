@@ -1,4 +1,13 @@
-import { Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { TicketsService } from './tickets.service';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -12,7 +21,50 @@ export class TicketsController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
   @Get('/')
-  findAllByShowtime(@Request() req, @Query('showtimeId') showtimeId: number) {
-    return this.ticketsService.findAllByShowtime(req.user.sub, showtimeId);
+  findAllTicketsForUser(
+    @Request() req,
+    @Query('showtimeId') showtimeId: number,
+  ) {
+    return this.ticketsService.findAllByShowtimeAndUserId(
+      req.user.sub,
+      showtimeId,
+    );
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get('/showtime/:showtimeId')
+  findAllTicketsByShowtime(@Param('showtimeId') showtimeId: number) {
+    return this.ticketsService.findAllByShowtime(showtimeId);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Customer, Role.Admin)
+  @Post('create')
+  async createTicket(
+    @Request() req,
+    @Query('showtimeId') showtimeId: number,
+    @Query('seatId') seatId: number,
+  ) {
+    try {
+      return await this.ticketsService.createTicket(
+        req.user.sub,
+        showtimeId,
+        seatId,
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Customer, Role.Admin)
+  @Delete('cancel')
+  async cancelTicket(@Request() req, @Query('ticketId') ticketId: number) {
+    try {
+      return await this.ticketsService.cancelTicket(req.user.sub, ticketId);
+    } catch (error) {
+      throw error;
+    }
   }
 }
