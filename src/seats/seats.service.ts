@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Seats } from './entities/seats.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateSeatsDto } from './dtos/create-seats.dto';
 
 @Injectable()
 export class SeatsService {
@@ -64,5 +65,12 @@ export class SeatsService {
         );`);
 
     return result.length > 0;
+  }
+
+  async createSeats(createSeatsDto: CreateSeatsDto[]) {
+    for (const seat of createSeatsDto) {
+      const newSeat = this.seatsRepository.create(seat);
+      await this.seatsRepository.save(newSeat);
+    }
   }
 }

@@ -1,10 +1,11 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { SeatsService } from './seats.service';
 import { GetSeatsDto } from './dtos/get-seats.dto';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Role } from 'src/auth/dtos/role.enum';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { CreateSeatsDto } from './dtos/create-seats.dto';
 
 @Controller('seats')
 export class SeatsController {
@@ -29,6 +30,17 @@ export class SeatsController {
     try {
       const { showtimeId } = query;
       return this.seatsService.getReservedSeats(showtimeId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Post('create')
+  async createSeats(@Body() createSeatsDto: CreateSeatsDto[]) {
+    try {
+      return await this.seatsService.createSeats(createSeatsDto);
     } catch (error) {
       throw error;
     }
