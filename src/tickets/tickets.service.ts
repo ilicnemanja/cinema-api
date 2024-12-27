@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Tickets } from './entities/tickets.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ShowtimesService } from 'src/showtimes/showtimes.service';
 import { SeatsService } from 'src/seats/seats.service';
+import { CreateTicketDto } from './dtos/create-ticket.dto';
 
 @Injectable()
 export class TicketsService {
@@ -11,6 +12,7 @@ export class TicketsService {
     @InjectRepository(Tickets) private ticketRepository: Repository<Tickets>,
     private readonly showtimeService: ShowtimesService,
     private readonly seatsService: SeatsService,
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async findAllByShowtimeAndUserId(userId: string, showtimeId: number) {
@@ -51,8 +53,10 @@ export class TicketsService {
     };
   }
 
-  async createTicket(userId: string, showtimeId: number, seatId: number) {
-    const showtime = await this.showtimeService.searchShowtimeById(showtimeId);
+  async createTicket(userId: string, createTicketDto: CreateTicketDto) {
+    const showtime = await this.showtimeService.searchShowtimeById(
+      createTicketDto.showtimeId,
+    );
 
     if (!showtime.data.showtime) {
       return {
@@ -61,31 +65,42 @@ export class TicketsService {
       };
     }
 
-    const isSeatAvailable = await this.seatsService.checkSeatAvailability(
-      seatId,
-      showtimeId,
-    );
+    const ticketsReserved: Tickets[] = [];
 
-    if (!isSeatAvailable) {
-      return {
-        status: 'error',
-        message: 'Seat not available',
-      };
+    for (const seatId of createTicketDto.seatIds) {
+      const isSeatAvailable = await this.seatsService.checkSeatAvailability(
+        seatId,
+        createTicketDto.showtimeId,
+      );
+
+      if (!isSeatAvailable) {
+        return {
+          status: 'error',
+          message: `Seat ${seatId} not available`,
+        };
+      }
+
+      // Should be inside a transaction
+
+      const ticket = this.ticketRepository.create({
+        user_id: userId,
+        showtime_id: createTicketDto.showtimeId,
+        seat_id: seatId,
+        status: 'RESERVED',
+      });
+
+      await this.ticketRepository.save(ticket);
+
+      ticketsReserved.push(ticket);
     }
-
-    const ticket = this.ticketRepository.create({
-      user_id: userId,
-      showtime_id: showtimeId,
-      seat_id: seatId,
-      status: 'RESERVED',
-    });
-
-    await this.ticketRepository.save(ticket);
 
     return {
       status: 'success',
       message: 'Reservation created',
-      data: ticket,
+      data: {
+        length: ticketsReserved.length,
+        tickets: ticketsReserved,
+      },
     };
   }
 

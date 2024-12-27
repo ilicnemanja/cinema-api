@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Seats } from './entities/seats.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { CreateSeatsDto } from './dtos/create-seats.dto';
 
 @Injectable()
 export class SeatsService {
   constructor(
     @InjectRepository(Seats) private seatsRepository: Repository<Seats>,
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async getAvailableSeats(showtimeId: number) {
@@ -68,9 +69,32 @@ export class SeatsService {
   }
 
   async createSeats(createSeatsDto: CreateSeatsDto[]) {
-    for (const seat of createSeatsDto) {
-      const newSeat = this.seatsRepository.create(seat);
-      await this.seatsRepository.save(newSeat);
+    const seats = createSeatsDto.map((dto) => ({
+      ...dto,
+      hall: { id: dto.hall_id },
+    }));
+
+    const result = await this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(Seats)
+      .values(seats)
+      .execute();
+
+    if (!result) {
+      return {
+        status: 'error',
+        message: 'Seats creation failed',
+      };
     }
+
+    return {
+      status: 'success',
+      message: 'Seats created successfully',
+      data: {
+        length: result.identifiers.length,
+        seats: result.identifiers,
+      },
+    };
   }
 }

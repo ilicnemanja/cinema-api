@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -13,6 +14,7 @@ import { TicketsService } from './tickets.service';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/dtos/role.enum';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { CreateTicketDto } from './dtos/create-ticket.dto';
 
 @Controller('tickets')
 export class TicketsController {
@@ -41,16 +43,11 @@ export class TicketsController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
   @Post('create')
-  async createTicket(
-    @Request() req,
-    @Query('showtimeId') showtimeId: number,
-    @Query('seatId') seatId: number,
-  ) {
+  async createTicket(@Request() req, @Body() createTicketDto: CreateTicketDto) {
     try {
       return await this.ticketsService.createTicket(
         req.user.sub,
-        showtimeId,
-        seatId,
+        createTicketDto,
       );
     } catch (error) {
       throw error;

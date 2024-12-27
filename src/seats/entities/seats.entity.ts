@@ -1,5 +1,11 @@
 import { Hall } from 'src/halls/entities/hall.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 
 @Entity('seats')
 export class Seats {
@@ -13,5 +19,6 @@ export class Seats {
   number: number;
 
   @ManyToOne(() => Hall, (hall) => hall.seats, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'hall_id' })
   hall: Hall;
 }
