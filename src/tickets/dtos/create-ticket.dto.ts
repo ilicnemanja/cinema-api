@@ -1,4 +1,10 @@
-import { ArrayNotEmpty, IsArray, IsNotEmpty, IsNumber } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+} from 'class-validator';
 
 export class CreateTicketDto {
   @IsNumber()
@@ -10,4 +16,8 @@ export class CreateTicketDto {
   @IsNumber({}, { each: true })
   @IsNotEmpty()
   seatIds: number[];
+
+  @IsBoolean()
+  @IsNotEmpty()
+  isForPay: boolean;
 }

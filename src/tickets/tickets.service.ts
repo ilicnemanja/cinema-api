@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Tickets } from './entities/tickets.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -67,31 +67,51 @@ export class TicketsService {
 
     const ticketsReserved: Tickets[] = [];
 
-    for (const seatId of createTicketDto.seatIds) {
-      const isSeatAvailable = await this.seatsService.checkSeatAvailability(
-        seatId,
-        createTicketDto.showtimeId,
-      );
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-      if (!isSeatAvailable) {
-        return {
-          status: 'error',
-          message: `Seat ${seatId} not available`,
-        };
+    try {
+      for (const seatId of createTicketDto.seatIds) {
+        const isSeatAvailable = await this.seatsService.checkSeatAvailability(
+          seatId,
+          createTicketDto.showtimeId,
+        );
+
+        if (!isSeatAvailable) {
+          throw new HttpException('Seat not available', HttpStatus.BAD_REQUEST);
+        }
+
+        const ticket = queryRunner.manager.create(Tickets, {
+          user_id: userId,
+          showtime_id: createTicketDto.showtimeId,
+          seat_id: seatId,
+          status: createTicketDto.isForPay ? 'SOLD' : 'RESERVED',
+        });
+
+        await queryRunner.manager.save(ticket);
+
+        ticketsReserved.push(ticket);
       }
 
-      // Should be inside a transaction
+      if (createTicketDto.isForPay) {
+        // TODO: payment logic here
+        // ...
+      }
 
-      const ticket = this.ticketRepository.create({
-        user_id: userId,
-        showtime_id: createTicketDto.showtimeId,
-        seat_id: seatId,
-        status: 'RESERVED',
-      });
+      // commit transaction now:
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // since we have errors let's rollback changes we made
+      await queryRunner.rollbackTransaction();
 
-      await this.ticketRepository.save(ticket);
-
-      ticketsReserved.push(ticket);
+      throw new HttpException(
+        `Failed to create reservation: ${err.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    } finally {
+      // you need to release query runner which is manually created:
+      await queryRunner.release();
     }
 
     return {
@@ -113,6 +133,13 @@ export class TicketsService {
       return {
         status: 'error',
         message: 'Ticket not found',
+      };
+    }
+
+    if (ticket.status === 'SOLD') {
+      return {
+        status: 'error',
+        message: 'Ticket already sold, cannot be cancelled',
       };
     }
 
