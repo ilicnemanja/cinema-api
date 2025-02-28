@@ -11,16 +11,24 @@ import { UsersModule } from './users/users.module';
 import { GenresModule } from './genres/genres.module';
 import { MovieGenreModule } from './movie-genre/movie-genre.module';
 import { AuthModule } from './auth/auth.module';
+import configuration from './utils/config';
+
+// Database connection
+const DB_NAME = configuration.database.dbName;
+const DB_USER = configuration.database.dbUsername;
+const DB_PASSWORD = configuration.database.dbPassword;
+const DB_HOST = configuration.database.dbHost;
+const DB_PORT = configuration.database.dbPort;
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'admin',
-      password: '1234',
-      database: 'cinema',
+      host: DB_HOST,
+      port: Number(DB_PORT),
+      username: DB_USER,
+      password: DB_PASSWORD,
+      database: DB_NAME,
       entities: [__dirname + '/../**/*.entity.js'],
       synchronize: false,
     }),
