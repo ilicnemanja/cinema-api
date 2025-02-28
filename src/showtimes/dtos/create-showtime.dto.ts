@@ -17,5 +17,5 @@ export class CreateShowtimeDto {
   release_date: Date;
 
   @IsBoolean()
-  IsActive: boolean;
+  isActive: boolean;
 }

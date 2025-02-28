@@ -46,9 +46,10 @@ export class ShowtimesService {
     };
   }
 
-  async searchAllShowtimes() {
+  async searchAllActiveShowtimes() {
     const showtimes = await this.showtimeRepository.find({
       relations: ['movie', 'hall'],
+      where: { isActive: true },
     });
 
     if (!showtimes) {

@@ -34,10 +34,10 @@ export class ShowtimesController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
-  @Get('all')
-  async searchAllShowtimes() {
+  @Get('active')
+  async searchAllActiveShowtimes() {
     try {
-      return await this.showtimesService.searchAllShowtimes();
+      return await this.showtimesService.searchAllActiveShowtimes();
     } catch (error) {
       throw error;
     }

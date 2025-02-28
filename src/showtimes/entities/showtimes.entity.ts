@@ -23,7 +23,7 @@ export class Showtimes {
   release_date: Date;
 
   @Column({ default: false })
-  IsActive: boolean;
+  isActive: boolean;
 
   @ManyToOne(() => Movies, (movie) => movie.showtimes)
   @JoinColumn({ name: 'movie_id' })
