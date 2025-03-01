@@ -10,8 +10,8 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 script {
+                    sh 'rm -rf repo || true'  // Delete 'repo' directory if it exists
                     sh 'git clone https://github.com/ilicnemanja/cinema-api.git repo'
-                    sh 'cd repo && git checkout main'
                 }
             }
         }
