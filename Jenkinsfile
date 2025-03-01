@@ -21,12 +21,6 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'NODE_OPTIONS="--max-old-space-size=512" npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund'
-            }
-        }
-
         stage('Build') {
             steps {
                 sh 'npm run build'
