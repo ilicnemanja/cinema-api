@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:22.14.0'
+        }
+    }
 
     environment {
         NODE_VERSION = '22.14.0'
