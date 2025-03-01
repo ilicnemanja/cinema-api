@@ -23,7 +23,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                sh 'NODE_OPTIONS="--max-old-space-size=512" npm install --legacy-peer-deps --prefer-offline --no-audit --no-fund'
             }
         }
 
@@ -40,7 +40,7 @@ pipeline {
                 rsync -av --delete dist $DEPLOY_PATH
                 cp package.json package-lock.json $DEPLOY_PATH
                 cd $DEPLOY_PATH
-                npm install
+                npm install --only=prod
                 pm2 restart cinema-api || pm2 start dist/main.js --name cinema-api
                 """
             }
