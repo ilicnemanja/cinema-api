@@ -23,7 +23,17 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'npm run build'
+                sh """
+                echo "Installing NestJS CLI..."
+                npm install -g @nestjs/cli
+
+                echo "Checking if NestJS CLI is available..."
+                export PATH=\$PATH:\$(npm root -g)/@nestjs/cli
+                nest --version || echo "NestJS CLI not found!"
+
+                echo "Running the build..."
+                npm run build
+                """
             }
         }
 
