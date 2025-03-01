@@ -11,6 +11,7 @@ import { UsersModule } from './users/users.module';
 import { GenresModule } from './genres/genres.module';
 import { MovieGenreModule } from './movie-genre/movie-genre.module';
 import { AuthModule } from './auth/auth.module';
+import { RedisModule } from './redis/redis.module';
 import configuration from './utils/config';
 
 // Database connection
@@ -41,6 +42,7 @@ const DB_PORT = configuration.database.dbPort;
     TicketsModule,
     GenresModule,
     MovieGenreModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

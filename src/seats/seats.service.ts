@@ -3,13 +3,70 @@ import { DataSource, Repository } from 'typeorm';
 import { Seats } from './entities/seats.entity';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { CreateSeatsDto } from './dtos/create-seats.dto';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class SeatsService {
   constructor(
     @InjectRepository(Seats) private seatsRepository: Repository<Seats>,
     @InjectDataSource() private dataSource: DataSource,
+    private readonly redisService: RedisService,
   ) {}
+
+  async lockSeat(
+    showtimeId: number,
+    movieId: string,
+    seatRow: number,
+    seatNumber: number,
+  ) {
+    await this.redisService.lockSeat(
+      showtimeId,
+      movieId,
+      seatRow.toString(),
+      seatNumber.toString(),
+      60,
+    );
+
+    return {
+      status: 'success',
+      message: 'Seat locked successfully',
+    };
+  }
+
+  async getLockedSeats(showtimeId: number, movieId: string) {
+    const lockedSeats = await this.redisService.getLockedSeats(
+      showtimeId,
+      movieId,
+    );
+
+    return {
+      status: 'success',
+      message: 'Locked seats fetched successfully',
+      data: {
+        length: lockedSeats.length,
+        seats: lockedSeats,
+      },
+    };
+  }
+
+  async unlockSeat(
+    showtimeId: number,
+    movieId: string,
+    seatRow: number,
+    seatNumber: number,
+  ) {
+    await this.redisService.unlockSeat(
+      showtimeId,
+      movieId,
+      seatRow.toString(),
+      seatNumber.toString(),
+    );
+
+    return {
+      status: 'success',
+      message: 'Seat unlocked successfully',
+    };
+  }
 
   async getAvailableSeats(showtimeId: number) {
     const result = await this.seatsRepository.query(`SELECT *
