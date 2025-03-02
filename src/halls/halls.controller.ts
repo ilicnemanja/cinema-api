@@ -12,11 +12,15 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { HallsService } from './halls.service';
 import { CreateHallDto } from './dtos/create-hall.dto';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiHalls } from 'src/utils/swagger/halls';
 
 @Controller('halls')
 export class HallsController {
   constructor(private readonly hallsService: HallsService) {}
 
+  @ApiBearerAuth()
+  @ApiBody(ApiHalls.ApiCreateHallBody)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Post('/create')
@@ -28,6 +32,7 @@ export class HallsController {
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Delete('/delete/:hallId')

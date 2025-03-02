@@ -15,11 +15,14 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Role } from 'src/auth/dtos/role.enum';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UpdateMovieDto } from './dtos/update-movie.dto';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiMovies } from 'src/utils/swagger/movies';
 
 @Controller('movies')
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
   @Get('search/:movieId')
@@ -31,6 +34,8 @@ export class MoviesController {
     }
   }
 
+  @ApiBearerAuth()
+  @ApiBody(ApiMovies.ApiCreateMovieBody)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Post('create')
@@ -42,6 +47,8 @@ export class MoviesController {
     }
   }
 
+  @ApiBearerAuth()
+  @ApiBody(ApiMovies.ApiUpdateMovieBody)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Put('update/:movieId')
@@ -56,6 +63,7 @@ export class MoviesController {
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Delete('delete/:movieId')

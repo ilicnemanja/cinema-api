@@ -5,11 +5,15 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { ShowtimesService } from './showtimes.service';
 import { CreateShowtimeDto } from './dtos/create-showtime.dto';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiShowtimes } from 'src/utils/swagger/showtimes';
 
 @Controller('showtimes')
 export class ShowtimesController {
   constructor(private readonly showtimesService: ShowtimesService) {}
 
+  @ApiBearerAuth()
+  @ApiBody(ApiShowtimes.ApiCreateShowtimeBody)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Post('/create')
@@ -21,6 +25,7 @@ export class ShowtimesController {
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
   @Get('search/:showtimeId')
@@ -32,6 +37,7 @@ export class ShowtimesController {
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
   @Get('active')

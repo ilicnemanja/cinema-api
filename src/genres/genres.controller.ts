@@ -15,11 +15,15 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { GenresService } from './genres.service';
 import { CreateGenreDto } from './dtos/create-genre.dto';
 import { UpdateGenreDto } from './dtos/update-genre.dto';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiGenres } from 'src/utils/swagger/genres';
 
 @Controller('genres')
 export class GenresController {
   constructor(private readonly genreService: GenresService) {}
 
+  @ApiBearerAuth()
+  @ApiBody(ApiGenres.ApiCreateGenreBody)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Post('create')
@@ -31,6 +35,7 @@ export class GenresController {
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Delete('/delete/:genreId')
@@ -42,6 +47,7 @@ export class GenresController {
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin, Role.Customer)
   @Get('/')
@@ -53,6 +59,7 @@ export class GenresController {
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin, Role.Customer)
   @Get('/:genreId')
@@ -64,6 +71,8 @@ export class GenresController {
     }
   }
 
+  @ApiBearerAuth()
+  @ApiBody(ApiGenres.ApiUpdateGenreBody)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Put('/update/:genreId')

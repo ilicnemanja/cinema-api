@@ -11,23 +11,28 @@ import {
 import { AuthService } from './auth.service';
 import { AuthGuard } from './guards/auth.guard';
 import { SignUpDto } from './dtos/sign-up.dto';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiAuth } from 'src/utils/swagger/auth';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiBody(ApiAuth.ApiLoginBody)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   signIn(@Body() signInDto: Record<string, any>) {
     return this.authService.signIn(signInDto.email, signInDto.password);
   }
 
+  @ApiBody(ApiAuth.ApiRegisterBody)
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
   signUp(@Body() signUpDto: SignUpDto) {
     return this.authService.signUp(signUpDto);
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Get('profile')
   getProfile(@Request() req) {

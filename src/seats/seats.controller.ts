@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { SeatsService } from './seats.service';
 import { GetSeatsDto } from './dtos/get-seats.dto';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -6,16 +6,20 @@ import { Role } from 'src/auth/dtos/role.enum';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { CreateSeatsDto } from './dtos/create-seats.dto';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiSeats } from 'src/utils/swagger/seats';
 
 @Controller('seats')
 export class SeatsController {
   constructor(private readonly seatsService: SeatsService) {}
 
+  @ApiBearerAuth()
+  @ApiBody(ApiSeats.ApiBodyForLockSeats)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
-  @Post('/lock')
+  @Post('/lock/:showtimeId')
   async lockSeat(
-    @Query() query: { showtimeId: number },
+    @Param() params: { showtimeId: number },
     @Body()
     body: {
       showtimeId: number;
@@ -25,7 +29,7 @@ export class SeatsController {
     },
   ) {
     try {
-      const { showtimeId } = query;
+      const { showtimeId } = params;
       const { movieId, seatRow, seatNumber } = body;
       return await this.seatsService.lockSeat(
         showtimeId,
@@ -38,15 +42,17 @@ export class SeatsController {
     }
   }
 
+  @ApiBearerAuth()
+  @ApiBody(ApiSeats.ApiBodyForGetLockedSeats)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
-  @Get('/locked')
+  @Get('/locked/:showtimeId')
   getLockedSeats(
-    @Query() query: GetSeatsDto,
+    @Param() params: GetSeatsDto,
     @Body() body: { movieId: string },
   ) {
     try {
-      const { showtimeId } = query;
+      const { showtimeId } = params;
       const { movieId } = body;
       return this.seatsService.getLockedSeats(showtimeId, movieId);
     } catch (error) {
@@ -54,15 +60,17 @@ export class SeatsController {
     }
   }
 
+  @ApiBearerAuth()
+  @ApiBody(ApiSeats.ApiBodyForUnlockSeats)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
-  @Post('/unlock')
+  @Post('/unlock/:showtimeId')
   async unlockSeat(
-    @Query() query: { showtimeId: number },
+    @Param() params: { showtimeId: number },
     @Body() body: { movieId: string; seatRow: number; seatNumber: number },
   ) {
     try {
-      const { showtimeId } = query;
+      const { showtimeId } = params;
       const { movieId, seatRow, seatNumber } = body;
       return await this.seatsService.unlockSeat(
         showtimeId,
@@ -75,30 +83,34 @@ export class SeatsController {
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
-  @Get('/available')
-  getAvailableSeats(@Query() query: GetSeatsDto) {
+  @Get('/available/:showtimeId')
+  getAvailableSeats(@Param() params: GetSeatsDto) {
     try {
-      const { showtimeId } = query;
+      const { showtimeId } = params;
       return this.seatsService.getAvailableSeats(showtimeId);
     } catch (error) {
       throw error;
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
-  @Get('/reserved')
-  getReservedSeats(@Query() query: GetSeatsDto) {
+  @Get('/reserved/:showtimeId')
+  getReservedSeats(@Param() params: GetSeatsDto) {
     try {
-      const { showtimeId } = query;
+      const { showtimeId } = params;
       return this.seatsService.getReservedSeats(showtimeId);
     } catch (error) {
       throw error;
     }
   }
 
+  @ApiBearerAuth()
+  @ApiBody(ApiSeats.ApiCreateSeatsListBody)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Post('create')

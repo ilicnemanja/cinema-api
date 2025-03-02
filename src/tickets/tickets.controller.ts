@@ -5,7 +5,6 @@ import {
   Get,
   Param,
   Post,
-  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -15,17 +14,20 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/dtos/role.enum';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiTickets } from 'src/utils/swagger/tickets';
 
 @Controller('tickets')
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
-  @Get('/')
+  @Get('/:showtimeId')
   findAllTicketsForUser(
     @Request() req,
-    @Query('showtimeId') showtimeId: number,
+    @Param('showtimeId') showtimeId: number,
   ) {
     return this.ticketsService.findAllByShowtimeAndUserId(
       req.user.sub,
@@ -33,6 +35,7 @@ export class TicketsController {
     );
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Get('/showtime/:showtimeId')
@@ -40,6 +43,8 @@ export class TicketsController {
     return this.ticketsService.findAllByShowtime(showtimeId);
   }
 
+  @ApiBearerAuth()
+  @ApiBody(ApiTickets.ApiCreateTicketBody)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
   @Post('create')
@@ -54,10 +59,11 @@ export class TicketsController {
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
-  @Delete('cancel')
-  async cancelTicket(@Request() req, @Query('ticketId') ticketId: number) {
+  @Delete('cancel/:ticketId')
+  async cancelTicket(@Request() req, @Param('ticketId') ticketId: number) {
     try {
       return await this.ticketsService.cancelTicket(req.user.sub, ticketId);
     } catch (error) {
