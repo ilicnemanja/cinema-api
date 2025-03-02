@@ -23,19 +23,6 @@ export const ApiBodyForLockSeats = {
   },
 };
 
-export const ApiBodyForGetLockedSeats = {
-  schema: {
-    type: 'object',
-    properties: {
-      movieId: {
-        type: 'string',
-        example: '5f8d0d55b54764421b7156d6',
-      },
-    },
-    required: ['movieId'],
-  },
-};
-
 export const ApiBodyForUnlockSeats = {
   schema: {
     type: 'object',
@@ -83,7 +70,6 @@ export const ApiCreateSeatsListBody = {
 
 export const ApiSeats = {
   ApiBodyForLockSeats,
-  ApiBodyForGetLockedSeats,
   ApiBodyForUnlockSeats,
   ApiCreateSeatsListBody,
 };

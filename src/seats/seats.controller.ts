@@ -41,7 +41,6 @@ export class SeatsController {
   }
 
   @ApiBearerAuth()
-  @ApiBody(ApiSeats.ApiBodyForGetLockedSeats)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
   @Get('/locked/:showtimeId/:movieId')
