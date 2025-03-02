@@ -24,7 +24,7 @@ export class TicketsController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
-  @Get('/:showtimeId')
+  @Get('/user/:showtimeId')
   findAllTicketsForUser(
     @Request() req,
     @Param('showtimeId') showtimeId: number,

@@ -21,6 +21,32 @@ export class MoviesService {
     private readonly movieGenreRepository: Repository<MovieGenre>,
   ) {}
 
+  async searchAllMovies() {
+    const movies = await this.moviesRepository.find({
+      relations: ['genres'],
+    });
+
+    const convertedMovies = movies.map((movie) => {
+      const { release_date, duration, genres, ...result } = movie;
+      const convertedDuration = convertDecimalToTime(duration);
+
+      return {
+        ...result,
+        release_date: new Date(release_date).toLocaleDateString(),
+        duration: `${convertedDuration.hours}h ${convertedDuration.minutes}m`,
+        genres: genres.map((genre) => genre.name),
+      };
+    });
+
+    return {
+      status: 'success',
+      message: 'Movies found',
+      data: {
+        movies: convertedMovies,
+      },
+    };
+  }
+
   async searchMovieById(movieId: string) {
     const result = await this.moviesRepository.findOne({
       where: { id: movieId },

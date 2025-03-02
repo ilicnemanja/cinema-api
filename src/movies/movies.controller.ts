@@ -25,6 +25,18 @@ export class MoviesController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
+  @Get('search')
+  async searchAllMovies() {
+    try {
+      return await this.moviesService.searchAllMovies();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Customer, Role.Admin)
   @Get('search/:movieId')
   async searchMovieById(@Param('movieId') movieId: string) {
     try {

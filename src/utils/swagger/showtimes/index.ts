@@ -12,16 +12,16 @@ export const ApiCreateShowtimeBody = {
       },
       start_time: {
         type: 'string',
-        example: '2025-03-05T14:00:00Z',
+        example: '14:00:00',
       },
       end_time: {
         type: 'string',
-        example: '2025-03-05T16:00:00Z',
+        example: '16:00:00',
       },
       release_date: {
         type: 'string',
         format: 'date-time',
-        example: '2025-03-05T00:00:00Z',
+        example: '2025-03-05',
       },
       isActive: {
         type: 'boolean',
