@@ -44,13 +44,12 @@ export class SeatsController {
   @ApiBody(ApiSeats.ApiBodyForGetLockedSeats)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
-  @Get('/locked/:showtimeId')
+  @Get('/locked/:showtimeId/:movieId')
   getLockedSeats(
     @Param('showtimeId') showtimeId: number,
-    @Body() body: { movieId: string },
+    @Param('movieId') movieId: string,
   ) {
     try {
-      const { movieId } = body;
       return this.seatsService.getLockedSeats(showtimeId, movieId);
     } catch (error) {
       throw error;
