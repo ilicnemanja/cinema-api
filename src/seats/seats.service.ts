@@ -13,6 +13,19 @@ export class SeatsService {
     private readonly redisService: RedisService,
   ) {}
 
+  async searchAllSeats() {
+    const result = await this.seatsRepository.find();
+
+    return {
+      status: 'success',
+      message: 'Seats fetched successfully',
+      data: {
+        length: result.length,
+        seats: result,
+      },
+    };
+  }
+
   async lockSeat(
     showtimeId: number,
     movieId: string,

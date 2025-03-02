@@ -13,6 +13,18 @@ export class SeatsController {
   constructor(private readonly seatsService: SeatsService) {}
 
   @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.Customer, Role.Admin)
+  @Get('search')
+  async searchAllSeats() {
+    try {
+      return await this.seatsService.searchAllSeats();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @ApiBearerAuth()
   @ApiBody(ApiSeats.ApiBodyForLockSeats)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
