@@ -5,12 +5,14 @@ import { DataSource, Repository } from 'typeorm';
 import { ShowtimesService } from 'src/showtimes/showtimes.service';
 import { SeatsService } from 'src/seats/seats.service';
 import { CreateTicketDto } from './dtos/create-ticket.dto';
+import { StripeService } from 'src/stripe/stripe.service';
 
 @Injectable()
 export class TicketsService {
   constructor(
     @InjectRepository(Tickets) private ticketRepository: Repository<Tickets>,
     private readonly showtimeService: ShowtimesService,
+    private readonly stripeService: StripeService,
     private readonly seatsService: SeatsService,
     @InjectDataSource() private dataSource: DataSource,
   ) {}
@@ -65,7 +67,26 @@ export class TicketsService {
       };
     }
 
+    const availableSeats = await this.seatsService.getAvailableSeats(
+      createTicketDto.showtimeId,
+      showtime.data.showtime.hall.id,
+    );
+    const availableSeatIds = availableSeats.data.seats.map((seat) => seat.id);
+
+    const unavailableSeats = createTicketDto.seatIds.filter(
+      (seatId) => !availableSeatIds.includes(seatId),
+    );
+
+    if (unavailableSeats.length > 0) {
+      throw new HttpException(
+        `Seats ${unavailableSeats.join(', ')} are already booked`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const ticketsReserved: Tickets[] = [];
+    let totalAmount = 0;
+    let paymentIntent = null;
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -73,35 +94,45 @@ export class TicketsService {
 
     try {
       for (const seatId of createTicketDto.seatIds) {
-        const isSeatAvailable = await this.seatsService.checkSeatAvailability(
-          seatId,
-          createTicketDto.showtimeId,
-        );
-
-        if (!isSeatAvailable) {
-          throw new HttpException('Seat not available', HttpStatus.BAD_REQUEST);
-        }
-
         const ticket = queryRunner.manager.create(Tickets, {
           user_id: userId,
           showtime_id: createTicketDto.showtimeId,
           seat_id: seatId,
-          status: createTicketDto.isForPay ? 'SOLD' : 'RESERVED',
+          status: createTicketDto.isForPay ? 'PENDING_PAYMENT' : 'RESERVED',
         });
 
         await queryRunner.manager.save(ticket);
 
         ticketsReserved.push(ticket);
+        totalAmount += 25; // TODO: add price based on showtime or hall
       }
 
       if (createTicketDto.isForPay) {
-        // TODO: payment logic here
-        // ...
+        paymentIntent = await this.stripeService.createPaymentIntent(
+          totalAmount,
+          'usd',
+          {
+            userId: userId,
+            tickets: JSON.stringify(
+              ticketsReserved.map((ticket) => {
+                return {
+                  ticket_id: ticket.id,
+                  seat_id: ticket.seat_id,
+                  showtime_id: ticket.showtime_id,
+                };
+              }),
+            ),
+          },
+        );
       }
 
       // commit transaction now:
       await queryRunner.commitTransaction();
     } catch (err) {
+      if (paymentIntent && paymentIntent.id) {
+        await this.stripeService.cancelPaymentIntent(paymentIntent.id);
+      }
+
       // since we have errors let's rollback changes we made
       await queryRunner.rollbackTransaction();
 
@@ -120,6 +151,8 @@ export class TicketsService {
       data: {
         length: ticketsReserved.length,
         tickets: ticketsReserved,
+        totalAmount,
+        paymentIntent,
       },
     };
   }

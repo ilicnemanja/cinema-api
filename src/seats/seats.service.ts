@@ -81,7 +81,7 @@ export class SeatsService {
     };
   }
 
-  async getAvailableSeats(showtimeId: number) {
+  async getAvailableSeats(showtimeId: number, hallId: number) {
     const result = await this.seatsRepository.query(`SELECT *
       FROM seats s
       WHERE NOT EXISTS (
@@ -90,7 +90,7 @@ export class SeatsService {
           WHERE t.seat_id = s.id
             AND t.showtime_id = ${showtimeId}
             AND (t.status = 'SOLD' OR t.status = 'RESERVED')
-      );`);
+      ) AND s.hall_id = ${hallId};`);
 
     return {
       status: 'success',

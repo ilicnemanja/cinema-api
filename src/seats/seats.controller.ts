@@ -7,10 +7,14 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { CreateSeatsDto } from './dtos/create-seats.dto';
 import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { ApiSeats } from 'src/utils/swagger/seats';
+import { ShowtimesService } from 'src/showtimes/showtimes.service';
 
 @Controller('seats')
 export class SeatsController {
-  constructor(private readonly seatsService: SeatsService) {}
+  constructor(
+    private readonly seatsService: SeatsService,
+    private readonly showtimeService: ShowtimesService,
+  ) {}
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)
@@ -93,9 +97,19 @@ export class SeatsController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.Customer, Role.Admin)
   @Get('/available/:showtimeId')
-  getAvailableSeats(@Param('showtimeId') showtimeId: number) {
+  async getAvailableSeats(@Param('showtimeId') showtimeId: number) {
     try {
-      return this.seatsService.getAvailableSeats(showtimeId);
+      const showtime =
+        await this.showtimeService.searchShowtimeById(showtimeId);
+
+      if (!showtime.data.showtime) {
+        throw new Error('Showtime not found');
+      }
+
+      return this.seatsService.getAvailableSeats(
+        showtimeId,
+        showtime.data.showtime.hall.id,
+      );
     } catch (error) {
       throw error;
     }

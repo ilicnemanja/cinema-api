@@ -16,7 +16,7 @@ export class Tickets {
 
   @Column({
     type: 'enum',
-    enum: ['RESERVED', 'SOLD'],
+    enum: ['RESERVED', 'SOLD', 'PENDING_PAYMENT'],
     default: 'RESERVED',
   })
   status: string;

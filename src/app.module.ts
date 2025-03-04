@@ -12,6 +12,8 @@ import { GenresModule } from './genres/genres.module';
 import { MovieGenreModule } from './movie-genre/movie-genre.module';
 import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
+import { StripeModule } from './stripe/stripe.module';
+import { OrderModule } from './order/order.module';
 import configuration from './utils/config';
 
 // Database connection
@@ -43,6 +45,8 @@ const DB_PORT = configuration.database.dbPort;
     GenresModule,
     MovieGenreModule,
     RedisModule,
+    StripeModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],
