@@ -104,7 +104,7 @@ export class TicketsService {
         await queryRunner.manager.save(ticket);
 
         ticketsReserved.push(ticket);
-        totalAmount += 25; // TODO: add price based on showtime or hall
+        totalAmount += 500; // TODO: add price based on showtime or hall
       }
 
       if (createTicketDto.isForPay) {
