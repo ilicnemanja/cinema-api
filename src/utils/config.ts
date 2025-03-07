@@ -18,6 +18,10 @@ const configuration = {
     secretKey: process.env.STRIPE_SECRET_KEY,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   },
+  auth: {
+    jwtSecret: process.env.JWT_SECRET,
+    googleClientId: process.env.GOOGLE_CLIENT_ID,
+  },
 };
 
 export default configuration;

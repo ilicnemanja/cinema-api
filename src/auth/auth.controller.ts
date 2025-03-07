@@ -33,6 +33,12 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
+  @Post('google')
+  async googleAuth(@Body() body) {
+    return this.authService.googleAuth(body.idToken);
+  }
+
+  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
