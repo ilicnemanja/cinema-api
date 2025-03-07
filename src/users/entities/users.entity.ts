@@ -11,8 +11,11 @@ export class Users {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
+
+  @Column({ nullable: true })
+  photoUrl: string;
 
   @Column({
     type: 'enum',
@@ -20,4 +23,11 @@ export class Users {
     default: 'CUSTOMER',
   })
   role: string;
+
+  @Column({
+    type: 'enum',
+    enum: ['CREDENTIALS', 'GOOGLE'],
+    default: 'CREDENTIALS',
+  })
+  provider: string;
 }
