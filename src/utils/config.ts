@@ -3,6 +3,10 @@ import { config } from 'dotenv';
 config();
 
 const configuration = {
+  environment: {
+    port: process.env.PORT || 3000,
+    nodeEnv: process.env.NODE_ENV || 'development',
+  },
   database: {
     dbUsername: process.env.DB_USERNAME || 'admin',
     dbPassword: process.env.DB_PASSWORD || '1234',
