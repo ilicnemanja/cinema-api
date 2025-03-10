@@ -20,8 +20,18 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(email: string, pass: string): Promise<{ accessToken: string }> {
+  async signIn(
+    email: string,
+    pass: string,
+    captcha: string,
+  ): Promise<{ accessToken: string }> {
     try {
+      const resp = await this.turnstileAuth(captcha);
+
+      if (!resp.success) {
+        throw new UnauthorizedException('Invalid captcha');
+      }
+
       const user = await this.validateUser(email, pass);
 
       if (!user) {
@@ -64,8 +74,16 @@ export class AuthService {
     }
   }
 
-  async signUp(user: any): Promise<any> {
+  async signUp(obj: any): Promise<any> {
     try {
+      const { captcha, ...user } = obj;
+
+      const resp = await this.turnstileAuth(captcha);
+
+      if (!resp.success) {
+        throw new UnauthorizedException('Invalid captcha');
+      }
+
       const salt = bcrypt.genSaltSync(10);
       user.id = uuidv4();
       user.password = bcrypt.hashSync(user.password, salt);
@@ -78,9 +96,7 @@ export class AuthService {
       ) {
         throw new ConflictException('User already exists');
       }
-      throw new InternalServerErrorException(
-        `An unexpected error occurred: ${error.message}`,
-      );
+      throw new InternalServerErrorException(`${error.message}`);
     }
   }
 
@@ -137,6 +153,37 @@ export class AuthService {
       throw new InternalServerErrorException(
         `An unexpected error occurred: ${error.message}`,
       );
+    }
+  }
+
+  async turnstileAuth(
+    token: string | undefined,
+  ): Promise<{ success: boolean }> {
+    if (!token) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    try {
+      const url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          secret: configuration.cloudflare.turnstileSecret,
+          response: token,
+        }),
+      });
+      const data = await resp.json();
+
+      if (data.success) {
+        return { success: true };
+      }
+
+      return { success: false };
+    } catch (error) {
+      throw new InternalServerErrorException(`${error.message}`);
     }
   }
 }

@@ -10,6 +10,10 @@ const ApiLoginBody = {
         type: 'string',
         example: 'password',
       },
+      captcha: {
+        type: 'string',
+        example: 'captcha',
+      },
     },
   },
 };
@@ -29,6 +33,10 @@ const ApiRegisterBody = {
       name: {
         type: 'string',
         example: 'John Doe',
+      },
+      captcha: {
+        type: 'string',
+        example: 'captcha',
       },
     },
   },

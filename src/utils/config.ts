@@ -22,6 +22,9 @@ const configuration = {
     jwtSecret: process.env.JWT_SECRET,
     googleClientId: process.env.GOOGLE_CLIENT_ID,
   },
+  cloudflare: {
+    turnstileSecret: process.env.TURNSTILE_SECRET_KEY,
+  },
 };
 
 export default configuration;
