@@ -11,4 +11,7 @@ export class SignUpDto {
 
   @IsString()
   name: string;
+
+  @IsString()
+  captcha: string;
 }
