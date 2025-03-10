@@ -163,6 +163,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token');
     }
 
+    if (
+      configuration.environment.nodeEnv === 'development' &&
+      token === 'XXXX.DUMMY.TOKEN.XXXX'
+    ) {
+      return { success: true };
+    }
+
     try {
       const url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
       const resp = await fetch(url, {
