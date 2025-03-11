@@ -12,7 +12,7 @@ const ApiLoginBody = {
       },
       captcha: {
         type: 'string',
-        example: 'captcha',
+        example: 'XXXX.DUMMY.TOKEN.XXXX',
       },
     },
   },

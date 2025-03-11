@@ -52,6 +52,26 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await this.client.del(seatKey);
   }
 
+  async storeAllMoviesFor5H(movies: any[], date: string): Promise<void> {
+    await this.client.set(
+      `cineplexx-movies-date:${date}`,
+      JSON.stringify(movies),
+      'EX',
+      18000,
+    );
+  }
+
+  async getMoviesForDate(date: string): Promise<any[]> {
+    const key = await this.client.keys(`cineplexx-movies-date:${date}`);
+
+    if (key.length === 0) {
+      return [];
+    }
+
+    const movies = await this.client.get(key[0]);
+    return JSON.parse(movies);
+  }
+
   async onModuleDestroy() {
     await this.client.quit();
   }

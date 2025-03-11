@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { StripeModule } from './stripe/stripe.module';
 import { OrderModule } from './order/order.module';
+import { CineplexxModule } from './cineplexx/cineplexx.module';
 import configuration from './utils/config';
 
 // Database connection
@@ -47,6 +48,7 @@ const DB_PORT = configuration.database.dbPort;
     RedisModule,
     StripeModule,
     OrderModule,
+    CineplexxModule,
   ],
   controllers: [AppController],
   providers: [AppService],
